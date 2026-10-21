@@ -1,0 +1,87 @@
+yeego launcher 0.4.0 — 微软正版登录配置
+
+当前状态
+已实现微软授权、Xbox 身份验证、Minecraft Java 版游玩资格检查和正版身份启动。
+已预置 yeego launcher 的应用 Client ID：edff64ae-bec6-4631-adaf-d431ab70d0ca。
+新安装和旧的空白应用配置会自动使用此 ID；已经手动保存的其他非空 ID 会保留。
+使用者无需各自注册应用，在「账号与正版」中用自己的微软账号登录即可。
+Minecraft API 审批状态尚未确认；配置 Client ID 不代表已获准访问 Minecraft API。
+
+零、先确认能访问自己的 Entra 目录
+注册应用需要可访问的 Entra 租户（目录）以及相应的应用注册权限。
+只有个人微软账号或 Minecraft 购买账号，并不表示已经具备这些开发者权限。
+若出现「账号不在 Microsoft Services 租户中」：
+1. 如果已有自己的 Azure / Entra 目录，在门户的「目录和订阅」切换到有权限的目录后重试。
+2. 如果从未开通过 Azure，可从 https://azure.microsoft.com/free/ 按当前页面资格与条款注册，完成账户和目录初始化。
+3. 用有权限的账号进入自己的目录，再进行应用注册。已有组织目录可联系该目录管理员获取应用注册权限。
+4. 无痕窗口可避免选中错误的缓存账号，但不能替代目录成员身份或应用注册权限。
+应使用自己的目录，不需要请求加入微软内部的 Microsoft Services 租户。
+若「创建租户」不可用，按微软现行租户创建要求处理：https://learn.microsoft.com/en-us/entra/fundamentals/create-new-tenant
+应用注册前置条件：https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app
+
+一、注册微软应用
+1. 打开 Microsoft Entra 管理中心：https://entra.microsoft.com/
+2. 进入 Entra ID → 应用注册 → 新注册，名称填写 yeego launcher。
+3. 支持的账号类型选择「仅个人 Microsoft 账户」，或「任何组织目录中的账户和个人 Microsoft 账户」。
+4. 注册后复制「应用程序（客户端）ID / Application (client) ID」，格式为 GUID。
+   不要复制对象 ID 或目录 ID；本桌面应用无需创建或填写客户端密码（Client Secret）。
+
+二、配置桌面应用回调
+1. 打开应用的「身份验证 / Authentication」。
+2. 添加「移动和桌面应用程序 / Mobile and desktop applications」平台。
+3. 添加回调 URI：http://localhost，然后保存。不要添加为 Web 或 SPA 平台。
+4. 若门户显示「允许公共客户端流」，可为本桌面公共客户端开启；无需启用隐式授权。
+
+程序采用授权码 + PKCE S256，在本机临时端口接收回调，例如 http://localhost:54321/。
+微软对 localhost 回调匹配忽略端口，无需登记每个临时端口。
+程序请求 XboxLive.signin 和 offline_access，不请求邮件或网盘权限。
+若出现 invalid_scope / unauthorized_client，请核对 Xbox 登录权限和应用配置。
+
+三、申请 Minecraft API 访问
+申请入口：https://aka.ms/mce-reviewappid
+2026-10-21 已核对开发者文档及该短链接的 Microsoft Forms 跳转；此前写成 MCLauncherAPI 有误，已更正。
+表单动态内容未能通过当前工具读取，以实际显示的字段为准。
+先在启动器中保存自己的 Client ID 并尝试微软登录一次。Helios Launcher 开发者文档指出应先有登录活动再申请许可。
+提交 yeego launcher 的 Client ID 并等待批准，不要填其他启动器的应用 ID。
+若表单包含以下字段，可这样准备：
+请求类型：New AppID for Approval（新应用审批）。
+Application ID / App ID：应用「概述」中的「应用程序（客户端）ID」。
+Tenant ID：同页的「目录（租户）ID」，与 Client ID 是两个不同字段。
+应用名称：yeego launcher；联系邮箱填写你能接收回复的邮箱。
+网站或项目地址：按实际情况填写，若要求公开项目页面，先准备真实页面；不要编造链接。
+用途说明可使用以下内容，并按实际情况调整：
+Yeego Launcher is an independently developed Windows launcher for Minecraft: Java Edition. It uses Microsoft OAuth 2.0 Authorization Code Flow with PKCE, Xbox Live, and Minecraft Services to authenticate users and verify Java Edition play entitlement before online launching. Refresh tokens are protected using Windows DPAPI and are not sent to any developer-operated server.
+不要在申请表中填写密码、访问令牌、刷新令牌或 Client Secret。
+尚未获得许可时，微软网页授权成功后，Minecraft 服务仍可能返回 HTTP 403 / Invalid app registration。
+此时启动器会停止正版启动，提示检查许可，不会伪造验证或自动改用离线身份。
+
+四、在 yeego launcher 使用
+1. 打开「账号与正版」，确认已预置的 Client ID；如需更换，填写后点击「保存应用配置」。
+2. 点击「微软登录 / 切换账号」，在系统浏览器中的微软官方页面登录并授权。
+3. 返回启动器。只有 Xbox、Java 版资格与玩家档案检查全部成功，才显示「正版已验证」。
+4. 选择「微软正版账号」身份，回到首页启动。正版玩家名来自官方档案，不能在首页修改。
+
+每次正版启动前会重新联网核验并刷新会话。游玩资格以 Minecraft 服务返回结果为准。
+若购买后还没有玩家档案，请在 https://www.minecraft.net/ 完成 Java 版玩家名设置。
+微软家庭、年龄或 Xbox 权限问题需在官方页面由本人或监护人处理。
+
+账号数据
+data\account.dat：Windows DPAPI 当前用户加密的刷新令牌与玩家信息。
+data\settings.json：只保存公开 Client ID、身份模式等普通配置，不保存令牌。
+Minecraft 访问令牌不写入普通配置或可读日志。
+Java 参数较长时使用仅当前 Windows 用户可读的 auth.args 临时文件，正常退出或启动失败后删除。
+launch.args 是脱敏诊断文件。若异常断电后残留 auth.args，可在关闭游戏后删除对应运行目录。
+「退出账号」移除本机登录缓存，不注销浏览器或微软网站上的其他会话。
+加密缓存不能直接复制到其他电脑或 Windows 用户，需要重新登录。
+
+验证范围
+已通过认证流程模拟、无资格拒绝、刷新、回调校验、Windows 加密和日志脱敏测试。
+已配置应用 Client ID，尚未确认 API 审批状态，未使用真实账号完成微软 → Xbox → Minecraft 的在线联调。
+
+参考链接
+微软应用注册：https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app
+PKCE 授权码流程：https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
+localhost 回调：https://learn.microsoft.com/en-us/entra/identity-platform/reply-url
+Minecraft API 许可入口说明：https://minecraft-launcher-lib.readthedocs.io/en/stable/tutorial/microsoft_login.html
+应用审批流程参考：https://github.com/dscalzi/HeliosLauncher/blob/master/docs/MicrosoftAuth.md
+服务请求格式参考（未复制源码）：https://github.com/PrismLauncher/PrismLauncher/tree/develop/launcher/minecraft/auth

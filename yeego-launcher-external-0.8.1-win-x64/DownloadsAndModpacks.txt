@@ -1,0 +1,97 @@
+yeego launcher 0.4.0 — 下载与整合包
+
+Minecraft 下载
+1. 打开「下载与安装」，选择安装目录。可使用现有 .minecraft 或空文件夹。
+2. 在 Minecraft 页点击「刷新版本列表」，选择正式版；需要时勾选快照 / 测试版。
+3. 选择原版、Fabric 或 Quilt；填写实例名称并点击「下载并安装」。
+4. 下载客户端、运行库和资源，并校验文件。Fabric / Quilt 自动选择可用加载器版本。
+5. 完成后版本库自动刷新并选中新实例，检查并按需安装对应 Java；到首页配置玩家身份、内存后启动。
+原版实例名可以直接使用 MC 版本号；带加载器的实例应使用不同的名称。
+Java 自动安装默认开启，详细步骤见「JavaSetup.txt」。Forge / NeoForge 运行官方安装器前也会准备兼容 Java。
+
+Modrinth 在线整合包
+1. 打开「Modrinth 整合包」页，输入名称搜索；留空可查看热门整合包。
+2. 选择项目与具体版本，填写新实例名称，点击「下载并安装整合包」。
+3. 程序下载并校验 .mrpack，读取 MC 和加载器依赖，下载游戏、加载器和模组文件。
+支持 .mrpack 指定的 Fabric、Quilt、Forge、NeoForge 或原版依赖。
+Forge / NeoForge 从官方 Maven 下载并校验安装器，在独立临时目录安装，再导入结果。
+0.7.3 另修复 Windows 中文路径启动时参数文件编码不匹配造成的 BootstrapLauncher 主类找不到问题。已安装的整合包直接重试启动，不需重新下载。
+0.7.2 会先下载并校验安装器的处理器 / 运行依赖，再交给官方安装器处理，减少 Java 自行下载依赖失败的问题。相同项目的不同版本分开保留。
+完整加载器安装日志保存在游戏目录的 .yeego/loader-logs，失败提示中显示具体位置。重试保留并复用已校验依赖。
+没有对应 Java 时自动从官方来源下载安装；关闭自动下载时，可在启动设置手动添加 64 位 Java。
+Modrinth 内容来自各项目作者；搜索最多显示前 25 项，可用更具体的名称查找。
+
+本地整合包
+支持：
+- 标准 Modrinth .mrpack（或 ZIP 内含根目录 modrinth.index.json）。
+- 包含一个客户端版本 JSON、客户端 JAR 和相关游戏文件的完整 ZIP。
+常见完整 ZIP 可为 .minecraft/versions/版本名/版本名.json 与同名 JAR，或独立实例根目录中的版本描述与 JAR。
+完整包必须能解析依赖；缺少基础原版依赖时会尝试从官方来源补全。
+带多个独立版本的 ZIP 请先只导出一个实例。
+完整 ZIP 导入常见 mods、config、resourcepacks、shaderpacks、saves、kubejs、scripts 等目录，不导入启动器配置、账号或日志。
+支持含 manifest.json 的 CurseForge 清单 ZIP；不支持只有 mods/config 且未描述游戏版本的普通 ZIP。
+
+可选内容与隔离
+「包含整合包的可选客户端文件」适用于 .mrpack；服务端专属文件不安装。
+先应用 overrides，再应用 client-overrides，不应用 server-overrides。
+yeego 新安装的整合包固定使用独立实例目录，避免与共享模组混用。
+已有同名自定义实例不会被覆盖。安装成功后自动切换到该游戏目录与新实例。
+完整 ZIP 导入的存档仍会受玩家 UUID 差异影响，请保留自己的原始备份。
+
+取消、失败与重试
+可随时点击「取消安装」。完成前的新实例放在临时目录，取消或失败后清理。
+已校验的共享游戏文件、资源和整合包下载文件会保留，重试时复用。
+不支持分段断点续传；未下载完整的单个文件会重新下载。
+.yeego/cache 是安装缓存，.yeego/packs 保存下载的整合包归档，占用空间可在没有安装任务时手动清理。
+网络错误、文件校验失败、加载器不支持或 Java 不兼容时会提示，不会把失败的临时目录加入版本库。
+游戏已经完整安装后，若后续 Java 下载失败或取消，保留该游戏实例，下次启动时再检查 Java。
+安装使用 Mojang、加载器官方源与 Modrinth 等允许的 HTTPS 来源；当前没有镜像源切换。
+
+验证情况
+自动检查覆盖哈希复用、损坏文件拒绝、取消回滚、目录越界、ZIP 重复路径、可选模组、客户端覆盖文件与强制隔离。
+已真实安装 Minecraft 1.21.11，并通过 Modrinth 搜索、下载和安装 Fabulously Optimized 12.3.0（MC 1.21.11 / Fabric，50 个整合包文件）。
+两者的启动计划和必需依赖检查通过；此轮验证未启动游戏，也未逐个验证所有 Forge、NeoForge、Quilt 整合包。
+0.7.2 另实际安装验证了 Minecraft 1.21.1 / NeoForge 21.1.176（Java 21），官方安装器执行成功，最终启动计划必需文件缺失为 0；未启动整合包游戏。
+
+参考
+Modrinth 格式：https://support.modrinth.com/en/articles/8802351-modrinth-modpack-format-mrpack
+Modrinth API：https://docs.modrinth.com/api/
+Fabric Meta：https://meta.fabricmc.net/
+Forge 安装器：https://github.com/MinecraftForge/Installer
+
+0.7.4 修复 Forge / NeoForge 整合包启动时原版 JAR 重复进入模块层造成的 ResolutionException。无需重装整合包或删除模组。
+
+0.7.5 兼容 Modrinth 整合包清单文件大小与实际文件不一致的情况：仅在指定 SHA512 完全匹配时接受，并记录大小差异；错误哈希仍拒绝。下载报错显示具体失败原因。
+
+0.7.6 自动补齐整合包额外模组与资源包：识别 missing_mods_checker.json，新安装完成前和已有实例启动前处理；也可在版本库点击「补齐整合包」。按指定版本从官方入口下载，缓存记录 SHA256，复制前再次校验；未补齐则显示具体文件和详细清单路径，不会误报安装成功。
+CurseForge 官方接口没有提供哈希时，使用 HTTPS 来源、准确文件编号/文件名、官方大小和归档结构检查，并记录本地 SHA256；本地缓存哈希不冒充作者发布的校验值。来源不允许自动下载或官方页面无法解析时会报告待补项。
+
+0.7.7 支持 CurseForge 清单 ZIP：在「下载与安装 → 本地导入」选择原始 ZIP；自动安装清单指定的 Minecraft、Forge/NeoForge/Fabric/Quilt 和文件版本，并应用 overrides 配置。资源包与光影包分类安装。可选文件由「包含可选文件」控制，来源拒绝或文件不可用时列出项目/文件编号，不发布不完整实例。
+
+CurseForge 清单指定文件的下载入口返回 404 或服务端故障时，会尝试相同文件编号和文件名的 CurseForge 官方 CDN；来源明确拒绝权限时不切换。语言支持组件（例如 KotlinForForge）可随整合包正常安装，不要求每个 JAR 都具有普通模组标识。
+
+0.7.8 历史文件元数据兼容：网页接口返回空数据或 404 时，可用 Curse Maven 公开诊断接口解析同一项目/文件编号的原始官方 CDN 地址；0.7.8 的此恢复路径下载自官方 CDN；其它来源的回退规则见 0.7.9 说明。仅接受严格匹配文件编号目录的官方 HTTPS 地址，记录解析来源和下载来源，权限拒绝及真实编号错误不触发此恢复。
+
+0.7.9 自动查找其它来源：
+- Modrinth 整合包清单中的全部地址失败时，按原 SHA512 查询 Modrinth 的同一文件；CurseForge CDN 地址也会在三个官方节点间回退，所有候选必须通过原 SHA512 校验。
+- CurseForge 整合包先尝试官方入口、mediafilez / edge / media 官方 CDN；若官方元数据提供 SHA1，或之前成功下载留下了本地哈希凭据，再按同一内容哈希查询 Modrinth。模组 JAR 还可回退到 CurseMaven 的固定项目编号/文件编号地址，并验证已知哈希。
+- CurseMaven 是第三方服务，与 CurseForge 无关联；第三方只作为最后回退，不会根据相似名称选择其它版本。首次安装且无已知哈希时，不从其它平台下载无法确认内容的同名文件。
+- 缓存凭据新增 SHA512，并记录实际来源；缓存丢失后可用原凭据校验重新下载的文件。哈希凭据用于内容一致性，不能代表作者数字签名。
+- 连接异常、请求超时、404、429、服务器错误或内容校验失败可尝试其它来源；明确的权限拒绝不会被当成网络故障。用户取消立即停止，不再开始换源。
+- 安装页面显示换源进度，运行日志记录切换与成功信息。全部来源都失败时保留缺失清单，不会假装安装完成。
+0.8.0 按钮文字与全局拖入安装：
+- 亮绿色按钮统一使用黑色文字，修复纯文字按钮被全局白色 TextBlock 样式覆盖的问题；深色区域仍按各自文字颜色显示。
+- 将一个本机 .mrpack 或整合包 .zip 文件拖入启动器任意页面，松开后自动识别、切换到「下载与安装 → 本地导入」并开始安装，无需再点安装按钮。
+- 使用当前「安装目录」和「包含整合包的可选客户端文件」选项；按包名新建隔离实例，同名自动添加 (2)、(3) 等后缀，已有实例不被覆盖。
+- 支持 Modrinth、CurseForge 清单及完整客户端 ZIP，继续使用已有校验、自动补齐和自动 Java 流程。一次接收一个文件；任务进行中拒绝新的拖入，可使用「取消安装」停止。
+0.8.1 English paths and External edition name:
+项目总目录：MinecraftLauncher
+External 版本目录：YeegoLauncherExternal
+源码：src/YeegoLauncher
+程序：App/YeegoLauncher.External.exe
+许可证：licenses
+说明文件：UserGuide.txt、MicrosoftLoginSetup.txt、DownloadsAndModpacks.txt、JavaSetup.txt、ModDownloads.txt。
+窗口名称为 yeego launcher External，侧栏为 EXTERNAL EDITION。界面操作文字保持中文。
+新建实例的目录和主版本文件使用 ASCII 英文名；中文名称转换时添加稳定摘要以区分名称，版本库和首页仍显示原名称。安装器保留中文旧实例的读取兼容性，现有中文实例可迁移并更新关联的版本引用；迁移记录和原始描述文件保存在 test-output/path-migration-0.8.1。
+整合包作者提供的模组、资源包和存档内部文件按原始清单保留，避免改名破坏内容引用。开发用 Unicode 兼容性样例也保留。
+本机迁移范围已按用户确认调整：只修改项目、程序目录和今后新建的实例。三个已有游戏实例已恢复原目录名和原始版本描述，版本库仍可正常读取。
